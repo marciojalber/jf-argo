@@ -17,6 +17,11 @@ type Env struct {
     RESPONSE    map[string]string
 }
 
+type EnvRef struct {
+    envContext  *map[string]string
+    field       string
+}
+
 func main() {
     fmt.Println("Content-Type: text/plain\n")
     envVars := Env{
@@ -26,47 +31,29 @@ func main() {
         SERVER:     map[string]string{},
         RESPONSE:   map[string]string{},
     }
-    
-    envVars.REQUEST["METHOD"]           = ""
-    envVars.REQUEST["QUERY_STRING"]     = ""
-    envVars.REQUEST["PARAMS"]           = ""
-    envVars.REQUEST["SCHEME"]           = ""
-    envVars.REQUEST["URL"]              = ""
-    envVars.REQUEST["TYPE"]             = ""
 
-    envVars.HTTP["ACCEPT"]              = ""
-    envVars.HTTP["CACHE_CONTROL"]       = ""
-    envVars.HTTP["COOKIE"]              = ""
-    envVars.HTTP["CONNECTION"]          = ""
-    envVars.HTTP["COMPRESS"]            = ""
-    envVars.HTTP["HOST"]                = ""
+    env_map                             := map[string]EnvRef{}
+    env_map["REQUEST_METHOD"]           = EnvRef{envContext: &envVars.REQUEST, field: "METHOD"}
+    env_map["QUERY_STRING"]             = EnvRef{envContext: &envVars.REQUEST, field: "QUERY_STRING"}
+    env_map["REQUEST_SCHEME"]           = EnvRef{envContext: &envVars.REQUEST, field: "SCHEME"}
 
-    envVars.SERVER["ADMIN"]             = ""
-    envVars.SERVER["NAME"]              = ""
-    envVars.SERVER["PORT"]              = ""
-    envVars.SERVER["PROTOCOL"]          = ""
-    envVars.SERVER["OS"]                = ""
-    
-    envVars.RESPONSE["REDIRECT_STATUS"] = ""
+    env_map["HTTP_ACCEPT"]              = EnvRef{envContext: &envVars.HTTP, field: "ACCEPT"}
+    env_map["HTTP_CACHE_CONTROL"]       = EnvRef{envContext: &envVars.HTTP, field: "CACHE_CONTROL"}
+    env_map["HTTP_COOKIE"]              = EnvRef{envContext: &envVars.HTTP, field: "COOKIE"}
+    env_map["HTTP_CONNECTION"]          = EnvRef{envContext: &envVars.HTTP, field: "CONNECTION"}
+    env_map["HTTP_ACCEPT_ENCODING"]     = EnvRef{envContext: &envVars.HTTP, field: "COMPRESS"}
+    env_map["HTTP_HOST"]                = EnvRef{envContext: &envVars.HTTP, field: "HOST"}
 
-    env_map                             := map[string][2]string{}
-    env_map["REQUEST_METHOD"]           = [2]string{"REQUEST", "METHOD"}
-    env_map["QUERY_STRING"]             = [2]string{"REQUEST", "QUERY_STRING"}
-    env_map["REQUEST_SCHEME"]           = [2]string{"REQUEST", "SCHEME"}
+    env_map["SERVER_ADMIN"]             = EnvRef{envContext: &envVars.SERVER, field: "ADMIN"}
+    env_map["SERVER_NAME"]              = EnvRef{envContext: &envVars.SERVER, field: "NAME"}
+    env_map["SERVER_PORT"]              = EnvRef{envContext: &envVars.SERVER, field: "PORT"}
+    env_map["SERVER_PROTOCOL"]          = EnvRef{envContext: &envVars.SERVER, field: "PROTOCOL"}
 
-    env_map["HTTP_ACCEPT"]              = [2]string{"HTTP", "ACCEPT"}
-    env_map["HTTP_CACHE_CONTROL"]       = [2]string{"HTTP", "CACHE_CONTROL"}
-    env_map["HTTP_COOKIE"]              = [2]string{"HTTP", "COOKIE"}
-    env_map["HTTP_CONNECTION"]          = [2]string{"HTTP", "CONNECTION"}
-    env_map["HTTP_ACCEPT_ENCODING"]     = [2]string{"HTTP", "COMPRESS"}
-    env_map["HTTP_HOST"]                = [2]string{"HTTP", "HOST"}
+    env_map["SERVER_PROTOCOL"]          = EnvRef{envContext: &envVars.RESPONSE, field: "REDIRECT_STATUS"}
 
-    env_map["SERVER_ADMIN"]             = [2]string{"SERVER", "ADMIN"}
-    env_map["SERVER_NAME"]              = [2]string{"SERVER", "NAME"}
-    env_map["SERVER_PORT"]              = [2]string{"SERVER", "PORT"}
-    env_map["SERVER_PROTOCOL"]          = [2]string{"SERVER", "PROTOCOL"}
-
-    env_map["SERVER_PROTOCOL"]          = [2]string{"RESPONSE", "REDIRECT_STATUS"}
+    for _, map_item := range env_map {
+        (*map_item.envContext)[map_item.field] = ""
+    }
 
     envs := os.Environ()
     for _, env := range envs {
@@ -79,16 +66,7 @@ func main() {
         fmt.Printf("%s = %s\n", key, val)
 
         if map_item, ok := env_map[key]; ok {
-            switch map_item[0] {
-                case "REQUEST":
-                    envVars.REQUEST[map_item[1]]    = val
-                case "HTTP":
-                    envVars.HTTP[map_item[1]]       = val
-                case "SERVER":
-                    envVars.SERVER[map_item[1]]     = val
-                case "RESPONSE":
-                    envVars.RESPONSE[map_item[1]]   = val
-            }
+            (*map_item.envContext)[map_item.field] = val
         }
     }
 
