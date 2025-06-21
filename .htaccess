@@ -1,0 +1,20 @@
+# Ativa CGI e define .exe e .cgi como scripts
+Options +ExecCGI -Indexes
+AddHandler cgi-script .exe .bin
+
+# Para binário Windows:
+<Files "dist/argo.exe">
+    SetHandler cgi-script
+</Files>
+
+# Para binário Linux:
+<Files "dist/argo">
+    SetHandler cgi-script
+</Files>
+
+# Redireciona /api para o binário correto manualmente
+RewriteEngine On
+
+RewriteCond %{ENV:WINDIR} ^.+$
+RewriteRule ^.*$ dist/argo.exe [L]
+RewriteRule ^.*$ dist/argo [L]
