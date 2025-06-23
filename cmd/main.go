@@ -40,7 +40,6 @@ func main() {
 
     env_map                             := map[string]EnvRef{}
     env_map["REQUEST_METHOD"]           = EnvRef{envContext: &envVars.REQUEST, field: "METHOD"}
-    // env_map["QUERY_STRING"]             = EnvRef{envContext: &envVars.REQUEST, field: "QUERY_STRING"}
     env_map["REQUEST_SCHEME"]           = EnvRef{envContext: &envVars.REQUEST, field: "SCHEME"}
 
     env_map["HTTP_ACCEPT"]              = EnvRef{envContext: &envVars.HTTP, field: "ACCEPT"}
@@ -83,6 +82,10 @@ func main() {
 
         if key != "QUERY_STRING" {
             envVars.OTHER[key] = val
+            continue
+        }
+
+        if val == "" {
             continue
         }
 

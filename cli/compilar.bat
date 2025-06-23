@@ -11,7 +11,7 @@ if not exist dist (
     echo Criando pasta dist...
     mkdir dist
 )
-cd src
+cd cmd
 
 :: Compila para Windows
 set h=%time:~0,2%
